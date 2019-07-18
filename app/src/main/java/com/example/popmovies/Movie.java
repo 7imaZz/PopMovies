@@ -9,7 +9,6 @@ public class Movie {
     private String releaseDate;
 
     public Movie(String title, String posterPath) {
-        this.title = title;
         this.posterPath = posterPath;
     }
 
