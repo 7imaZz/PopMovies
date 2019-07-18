@@ -1,6 +1,7 @@
 package com.example.popmovies;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,11 +46,31 @@ public class MoviesAdapter extends BaseAdapter {
             view = LayoutInflater.from(context).inflate(R.layout.grid_item, viewGroup, false);
         }
 
-        Movie currentMovie = (Movie) getItem(i);
+        final Movie currentMovie = (Movie) getItem(i);
 
         ImageView posterImageView = view.findViewById(R.id.img_poster);
         Picasso.get().load(BASE_URL+IMAGE_SIZE+currentMovie.getPosterPath()).into(posterImageView);
 
+        posterImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(context, MovieDetailsActivity.class);
+
+                intent.putExtra(Constants.TITLE, currentMovie.getTitle());
+                intent.putExtra(Constants.POSTER_PATH, currentMovie.getPosterPath());
+                intent.putExtra(Constants.VOTE_AVERAGE, currentMovie.getVoteAverage()+"");
+                intent.putExtra(Constants.OVERVIEW, currentMovie.getOverview());
+                intent.putExtra(Constants.RELEASE_DATE, currentMovie.getReleaseDate());
+
+                context.startActivity(intent);
+            }
+        });
+
         return view;
+    }
+
+    public ArrayList<Movie> getMovies() {
+        return movies;
     }
 }

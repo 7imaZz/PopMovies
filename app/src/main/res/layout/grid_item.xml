@@ -9,7 +9,6 @@
         android:layout_height="278dp"
         android:scaleType="fitCenter"
         android:clickable="true"
-        android:focusableInTouchMode="true"
         android:foreground="?attr/selectableItemBackground"/>
 
 
