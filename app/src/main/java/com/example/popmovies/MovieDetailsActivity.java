@@ -12,17 +12,20 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MovieDetailsActivity extends AppCompatActivity {
 
     private static final String BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String IMAGE_SIZE = "w500";
 
-    private TextView titleTextView;
-    private ImageView movieImageView;
-    private TextView dateTextView;
-    private TextView durationTextView;
-    private TextView voteTextView;
-    private TextView overviewTextView;
+    @BindView(R.id.tv_title) TextView titleTextView;
+    @BindView(R.id.img_movie) ImageView movieImageView;
+    @BindView(R.id.tv_released_date) TextView dateTextView;
+    @BindView(R.id.tv_duration) TextView durationTextView;
+    @BindView(R.id.tv_vote_rate) TextView voteTextView;
+    @BindView(R.id.tv_overview) TextView overviewTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +34,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        titleTextView = findViewById(R.id.tv_title);
+        /*titleTextView = findViewById(R.id.tv_title);
         movieImageView = findViewById(R.id.img_movie);
         dateTextView = findViewById(R.id.tv_released_date);
         durationTextView = findViewById(R.id.tv_duration);
         voteTextView = findViewById(R.id.tv_vote_rate);
-        overviewTextView = findViewById(R.id.tv_overview);
+        overviewTextView = findViewById(R.id.tv_overview);*/
+        ButterKnife.bind(this);
 
         String title = getIntent().getStringExtra(Constants.TITLE);
         String poster = getIntent().getStringExtra(Constants.POSTER_PATH);
