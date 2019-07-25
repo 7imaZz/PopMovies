@@ -5,4 +5,10 @@
     <string name="movie_details_label">Movie Details</string>
     <string name="most_pop_label">Sort By Most Popular</string>
     <string name="highest_rated_labe">Sort By Highest Rated</string>
+    <string name="prev">Previous</string>
+    <string name="next">next</string>
+    <string name="now_playing_label">Sort By Now Playing</string>
+    <string name="upcoming_label">Sort By Upcoming</string>
+    <string name="similar_label">Similar Movies</string>
+    <string name="reco_label">Recommended For You</string>
 </resources>

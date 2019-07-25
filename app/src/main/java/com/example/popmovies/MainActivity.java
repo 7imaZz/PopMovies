@@ -1,10 +1,15 @@
 package com.example.popmovies;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuItemCompat;
+
+
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -12,9 +17,13 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import org.json.JSONArray;
@@ -31,14 +40,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import okhttp3.OkHttpClient;
+public class MainActivity extends AppCompatActivity{
 
-public class MainActivity extends AppCompatActivity {
 
-    private static final String RESULTS = "results";
+    private static final String POP_URL = "https://api.themoviedb.org/3/movie/popular?api_key=3b97af0112652688c49f023ecc57edb9&language=en-US&page=";
+    private static final String TOP_RATED_URL = "https://api.themoviedb.org/3/movie/top_rated?api_key=3b97af0112652688c49f023ecc57edb9&language=en-US&page=";
+    private static final String NOW_PLAYING = "https://api.themoviedb.org/3/movie/now_playing?api_key=3b97af0112652688c49f023ecc57edb9&language=en-US&page=";
+    private static final String UPCOMING = "https://api.themoviedb.org/3/movie/upcoming?api_key=3b97af0112652688c49f023ecc57edb9&language=en-US&page=";
 
-    private static final String POP_URL = "http://api.themoviedb.org/3/movie/popular?api_key=3b97af0112652688c49f023ecc57edb9";
-    private static final String TOP_RATED_URL = "https://api.themoviedb.org/3/movie/top_rated?api_key=3b97af0112652688c49f023ecc57edb9";
+    private String searchedMovie;
+    private static final String SEARCH_API = "https://api.themoviedb.org/3/search/movie?api_key=3b97af0112652688c49f023ecc57edb9&query=";
+    private static final String PAGE = "&page=";
 
     //To Define Which URL Will Be Token, POP Or TOP
     private static final String URL_PATH = "url";
@@ -46,45 +58,89 @@ public class MainActivity extends AppCompatActivity {
     private GridView gridView;
     private ProgressBar progressBar;
     private TextView noNetworkTextView;
+    private Button previousButton;
+    private Button nextButton;
 
     private ArrayList<Movie> movies = new ArrayList<>();
 
     private MoviesAdapter adapter;
+
+    private int pageNum;
+    private int totalPages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         gridView = findViewById(R.id.grid_view);
         progressBar = findViewById(R.id.progress);
         noNetworkTextView = findViewById(R.id.tv_empty);
+        previousButton = findViewById(R.id.btn_prev);
+        nextButton = findViewById(R.id.btn_next);
+
+        if (getIntent().getStringExtra("num")==null){
+            pageNum = 1;
+        }else {
+            pageNum = Integer.parseInt(getIntent().getStringExtra("num"));
+        }
+
 
 
         if (getIntent().getStringExtra(URL_PATH) == null){
             noNetworkTextView.setVisibility(View.GONE);
-
-            if (isNetworkAvailable(this)){
-                new MoviesAsyncTask().execute(POP_URL);
-            }else{
-                progressBar.setVisibility(View.GONE);
-                noNetworkTextView.setVisibility(View.VISIBLE);
-                noNetworkTextView.setOnClickListener(view -> openInternetSettings());
-
-            }
+            new MoviesAsyncTask().execute(POP_URL+pageNum);
         }else{
             noNetworkTextView.setVisibility(View.GONE);
+            new MoviesAsyncTask().execute(getIntent().getStringExtra(URL_PATH)+pageNum);
 
-            if (isNetworkAvailable(this)){
-                new MoviesAsyncTask().execute(getIntent().getStringExtra(URL_PATH));
-            }else{
-                progressBar.setVisibility(View.GONE);
-                noNetworkTextView.setVisibility(View.VISIBLE);
-                noNetworkTextView.setOnClickListener(view -> openInternetSettings());
-            }
         }
 
+        gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
 
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+            {
+                if(firstVisibleItem + visibleItemCount >= totalItemCount){
+                    nextButton.setVisibility(View.VISIBLE);
+                    previousButton.setVisibility(View.VISIBLE);
+                }else {
+                    nextButton.setVisibility(View.GONE);
+                    previousButton.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        if (pageNum == 1){
+            previousButton.setEnabled(false);
+        }else {
+            previousButton.setEnabled(true);
+        }
+
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pageNum++;
+                getIntent().putExtra("num", String.valueOf(pageNum));
+                finish();
+                startActivity(getIntent());
+            }
+        });
+
+        previousButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pageNum--;
+                getIntent().putExtra("num", String.valueOf(pageNum));
+                finish();
+                startActivity(getIntent());
+            }
+        });
 
     }
 
@@ -93,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
         intent.setClassName("com.android.phone", "com.android.phone.NetworkSetting");
         startActivity(intent);
     }
+
 
     public class MoviesAsyncTask extends AsyncTask<String, Void, ArrayList<Movie>>{
 
@@ -132,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             }else {
                 return movies;
             }
-            return null;
+            return movies;
         }
 
         @Override
@@ -143,6 +200,18 @@ public class MainActivity extends AppCompatActivity {
             adapter = new MoviesAdapter(MainActivity.this, movies);
 
             gridView.setAdapter(adapter);
+
+            if (getIntent().getStringExtra(URL_PATH) == null){
+                setTitle("Most Popular ("+pageNum+" Of "+totalPages+")");
+            }else{
+                setTitle(getIntent().getStringExtra("title")+" ("+pageNum+" Of "+totalPages+")");
+            }
+
+            if (pageNum == totalPages){
+                nextButton.setEnabled(false);
+            }else {
+                nextButton.setEnabled(true);
+            }
         }
     }
 
@@ -168,7 +237,9 @@ public class MainActivity extends AppCompatActivity {
         try {
 
             JSONObject root = new JSONObject(json);
-            JSONArray results = root.getJSONArray(RESULTS);
+            JSONArray results = root.getJSONArray(Constants.RESULTS);
+
+            totalPages = root.getInt(Constants.TOTAL_PAGES);
 
             for (int i=0; i<results.length(); i++){
 
@@ -179,8 +250,9 @@ public class MainActivity extends AppCompatActivity {
                 String overview = currentMovie.getString(Constants.OVERVIEW);
                 double voteAvg = currentMovie.getDouble(Constants.VOTE_AVERAGE);
                 String releaseDate = currentMovie.getString(Constants.RELEASE_DATE);
+                String movieId = currentMovie.getString(Constants._ID);
 
-                movies.add(new Movie(title, posterPath, overview, voteAvg, releaseDate));
+                movies.add(new Movie(title, posterPath, overview, voteAvg, releaseDate, movieId));
             }
 
             return movies;
@@ -194,7 +266,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
-        return super.onCreateOptionsMenu(menu);
+        // Retrieve the SearchView and plug it into SearchManager
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
+        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                searchedMovie = s.replaceAll(" ", "%20");
+                pageNum = 1;
+                getIntent().putExtra("num", pageNum);
+                getIntent().putExtra(URL_PATH, SEARCH_API+searchedMovie+PAGE+pageNum);
+                getIntent().putExtra("title", "Found");
+                finish();
+                startActivity(getIntent());
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+        });
+        return true;
     }
 
     @Override
@@ -202,11 +297,31 @@ public class MainActivity extends AppCompatActivity {
 
         int id =  item.getItemId();
         if (id==R.id.menu_most_pop){
+            pageNum = 1;
+            getIntent().putExtra("num", pageNum);
             getIntent().putExtra(URL_PATH, POP_URL);
+            getIntent().putExtra("title", "Most Popular");
             finish();
             startActivity(getIntent());
         }else if (id==R.id.menu_highest_rated){
+            pageNum = 1;
+            getIntent().putExtra("num", pageNum);
             getIntent().putExtra(URL_PATH, TOP_RATED_URL);
+            getIntent().putExtra("title", "Highest Rated");
+            finish();
+            startActivity(getIntent());
+        }else if (id==R.id.menu_now_playing){
+            pageNum = 1;
+            getIntent().putExtra("num", pageNum);
+            getIntent().putExtra(URL_PATH, NOW_PLAYING);
+            getIntent().putExtra("title", "Now Playing");
+            finish();
+            startActivity(getIntent());
+        }else if(id==R.id.menu_upcoming){
+            pageNum = 1;
+            getIntent().putExtra("num", pageNum);
+            getIntent().putExtra(URL_PATH, UPCOMING);
+            getIntent().putExtra("title", "Upcoming");
             finish();
             startActivity(getIntent());
         }

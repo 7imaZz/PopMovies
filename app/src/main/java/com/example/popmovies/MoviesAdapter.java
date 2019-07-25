@@ -7,7 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -15,7 +18,7 @@ import java.util.ArrayList;
 public class MoviesAdapter extends BaseAdapter {
 
     private static final String BASE_URL = "http://image.tmdb.org/t/p/";
-    private static final String IMAGE_SIZE = "w500";
+    private static final String IMAGE_SIZE = "w342";
 
     private Context context;
     private ArrayList<Movie> movies;
@@ -49,7 +52,29 @@ public class MoviesAdapter extends BaseAdapter {
         final Movie currentMovie = (Movie) getItem(i);
 
         ImageView posterImageView = view.findViewById(R.id.img_poster);
-        Picasso.get().load(BASE_URL+IMAGE_SIZE+currentMovie.getPosterPath()).into(posterImageView);
+        ProgressBar progressBar = view.findViewById(R.id.pb_image);
+        TextView titleTextView = view.findViewById(R.id.tv_movie_title);
+
+        titleTextView.setText(currentMovie.getTitle());
+
+        posterImageView.setContentDescription(currentMovie.getTitle());
+
+        Picasso.get().load(BASE_URL+IMAGE_SIZE+currentMovie.getPosterPath())
+                .placeholder(R.mipmap.placeholder)
+                .fit()
+                .into(posterImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        progressBar.setVisibility(View.GONE);
+                        titleTextView.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        titleTextView.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
 
         posterImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,6 +87,7 @@ public class MoviesAdapter extends BaseAdapter {
                 intent.putExtra(Constants.VOTE_AVERAGE, currentMovie.getVoteAverage()+"");
                 intent.putExtra(Constants.OVERVIEW, currentMovie.getOverview());
                 intent.putExtra(Constants.RELEASE_DATE, currentMovie.getReleaseDate());
+                intent.putExtra(Constants._ID, currentMovie.getMovieId());
 
                 context.startActivity(intent);
             }

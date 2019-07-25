@@ -11,4 +11,20 @@
         android:title="@string/highest_rated_labe"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/menu_now_playing"
+        android:title="@string/now_playing_label"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/menu_upcoming"
+        android:title="@string/upcoming_label"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_search"
+        android:title="Search"
+        android:icon="@drawable/ic_search_black_24dp"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.widget.SearchView" />
+
 </menu>

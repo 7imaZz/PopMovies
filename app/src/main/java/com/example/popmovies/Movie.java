@@ -7,6 +7,7 @@ public class Movie {
     private String overview;
     private Double voteAverage;
     private String releaseDate;
+    private String movieId;
 
     public Movie(String title, String posterPath) {
         this.posterPath = posterPath;
@@ -18,6 +19,15 @@ public class Movie {
         this.overview = overview;
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
+    }
+
+    public Movie(String title, String posterPath, String overview, Double voteAverage, String releaseDate, String movieId) {
+        this.title = title;
+        this.posterPath = posterPath;
+        this.overview = overview;
+        this.voteAverage = voteAverage;
+        this.releaseDate = releaseDate;
+        this.movieId = movieId;
     }
 
     public String getTitle() {
@@ -38,5 +48,9 @@ public class Movie {
 
     public String getReleaseDate() {
         return releaseDate;
+    }
+
+    public String getMovieId() {
+        return movieId;
     }
 }

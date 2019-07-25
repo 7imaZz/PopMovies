@@ -5,81 +5,128 @@
     android:layout_height="match_parent"
     tools:context=".MovieDetailsActivity">
 
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:background="#003366"
-            android:text="Test"
-            android:textSize="30sp"
-            android:paddingLeft="20dp"
-            android:gravity="center_vertical"
-            android:textColor="#FFF"/>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/img_movie"
-                android:layout_width="154dp"
-                android:layout_height="231dp"
-                android:layout_marginLeft="30dp"/>
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:background="#003366"
+                android:text="Test"
+                android:textSize="30sp"
+                android:paddingLeft="20dp"
+                android:gravity="center_vertical"
+                android:textColor="#FFF"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginLeft="15dp">
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/tv_released_date"
+                <RelativeLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="2010"
-                    android:textSize="22sp"/>
-                <TextView
-                    android:id="@+id/tv_duration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="130 min"
-                    android:textSize="17sp"/>
-                <TextView
-                    android:id="@+id/tv_vote_rate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="8/10"
-                    android:textSize="17sp"
-                    android:textColor="#000"/>
+                    android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/tv_mark"
-                    android:layout_width="100dp"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="15dp"
-                    android:background="#0f4366"
-                    android:textColor="#FFF"
-                    android:text="@string/Mark"
-                    android:gravity="center"
-                    android:clickable="true"
-                    android:focusableInTouchMode="true"
-                    android:foreground="?attr/selectableItemBackground"/>
+                    <ImageView
+                        android:id="@+id/img_movie"
+                        android:layout_width="154dp"
+                        android:layout_height="231dp"
+                        android:layout_marginLeft="30dp"/>
+
+                    <ProgressBar
+                        android:id="@+id/pb_pic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"/>
+
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="15dp">
+
+                    <TextView
+                        android:id="@+id/tv_released_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2010"
+                        android:textSize="22sp"/>
+                    <TextView
+                        android:id="@+id/tv_duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="130 min"
+                        android:textSize="17sp"/>
+                    <TextView
+                        android:id="@+id/tv_vote_rate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="8/10"
+                        android:textSize="17sp"
+                        android:textColor="#000"/>
+
+                    <TextView
+                        android:id="@+id/tv_mark"
+                        android:layout_width="100dp"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="15dp"
+                        android:background="#0f4366"
+                        android:textColor="#FFF"
+                        android:text="@string/Mark"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusableInTouchMode="true"
+                        android:foreground="?attr/selectableItemBackground"/>
+                </LinearLayout>
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_overview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:padding="10dp"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:textColor="#000"
+                android:text="@string/similar_label"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_similar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:textColor="#000"
+                android:text="@string/reco_label"
+                android:layout_marginTop="8dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_reco"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </androidx.recyclerview.widget.RecyclerView>
+
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tv_overview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:padding="10dp"
-            android:textSize="18sp"/>
     </LinearLayout>
 </ScrollView>
