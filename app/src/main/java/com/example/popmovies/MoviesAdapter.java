@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -15,19 +17,22 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class MoviesAdapter extends BaseAdapter {
+public class MoviesAdapter extends BaseAdapter implements Filterable {
 
     private static final String BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String IMAGE_SIZE = "w342";
 
     private Context context;
     private List<Movie> movies;
+    private List<Movie> moviesFull;
 
     public MoviesAdapter(Context context, List<Movie> movies) {
         this.context = context;
         this.movies = movies;
+        moviesFull = new ArrayList<>(movies);
     }
 
     @Override
@@ -98,7 +103,35 @@ public class MoviesAdapter extends BaseAdapter {
         return view;
     }
 
-    public List<Movie> getMovies() {
-        return movies;
+    @Override
+    public Filter getFilter() {
+        return moviesFilter;
     }
+
+    private Filter moviesFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Movie> filteredList = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0){
+                filteredList.addAll(moviesFull);
+            }else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (Movie movie : moviesFull){
+                    if (movie.getTitle().toLowerCase().contains(filterPattern)){
+                        filteredList.add(movie);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+            movies.clear();
+            movies.addAll((List) filterResults.values);
+            notifyDataSetChanged();
+        }
+    };
 }

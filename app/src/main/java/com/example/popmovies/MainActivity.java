@@ -86,16 +86,20 @@ public class MainActivity extends AppCompatActivity{
         }
 
 
+        if (isNetworkAvailable(this)) {
 
-        if (getIntent().getStringExtra(URL_PATH) == null){
             noNetworkTextView.setVisibility(View.GONE);
-            new MoviesAsyncTask().execute(POP_URL+pageNum);
+            if (getIntent().getStringExtra(URL_PATH) == null) {
+                noNetworkTextView.setVisibility(View.GONE);
+                new MoviesAsyncTask().execute(POP_URL + pageNum);
+            } else {
+                noNetworkTextView.setVisibility(View.GONE);
+                new MoviesAsyncTask().execute(getIntent().getStringExtra(URL_PATH) + pageNum);
+
+            }
         }else{
-            noNetworkTextView.setVisibility(View.GONE);
-            new MoviesAsyncTask().execute(getIntent().getStringExtra(URL_PATH)+pageNum);
-
+            noNetworkTextView.setVisibility(View.VISIBLE);
         }
-
         gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int i) {
@@ -278,7 +282,7 @@ public class MainActivity extends AppCompatActivity{
                 searchedMovie = s.replaceAll(" ", "%20");
                 pageNum = 1;
                 getIntent().putExtra("num", pageNum);
-                getIntent().putExtra(URL_PATH, SEARCH_API+searchedMovie+PAGE+pageNum);
+                getIntent().putExtra(URL_PATH, SEARCH_API+searchedMovie+PAGE);
                 getIntent().putExtra("title", "Found");
                 finish();
                 startActivity(getIntent());
