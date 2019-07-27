@@ -5,16 +5,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Size;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -59,12 +61,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.tv_title) TextView titleTextView;
     @BindView(R.id.img_movie) ImageView movieImageView;
     @BindView(R.id.tv_released_date) TextView dateTextView;
-    @BindView(R.id.tv_duration) TextView durationTextView;
     @BindView(R.id.tv_vote_rate) TextView voteTextView;
     @BindView(R.id.tv_overview) TextView overviewTextView;
     @BindView(R.id.pb_pic) ProgressBar progressBar;
     @BindView(R.id.rv_similar) RecyclerView similarRecyclerView;
     @BindView(R.id.rv_reco) RecyclerView recommendedRecyclerView;
+    @BindView(R.id.tv_favorites) TextView favouriteButton;
+
+    private AppDatabase db;
+    private Movie movie;
+
+    private int favFlag = 0;
 
 
     @Override
@@ -73,6 +80,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_details);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        db = AppDatabase.getInstance(this);
+
+
+
+
 
         /*titleTextView = findViewById(R.id.tv_title);
         movieImageView = findViewById(R.id.img_movie);
@@ -89,6 +102,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         String overview = getIntent().getStringExtra(Constants.OVERVIEW);
         movieId = getIntent().getStringExtra(Constants._ID);
 
+        movie = new Movie(title, poster, overview, Double.parseDouble(vote), releaseDate, movieId);
 
         titleTextView.setText(title);
         dateTextView.setText(releaseDate);
@@ -106,6 +120,16 @@ public class MovieDetailsActivity extends AppCompatActivity {
         new MoviesDetailsAsyncTask().execute(BASE_TERM+movieId+SIMILAR_TERM);
         new RecoMoviesDetailsAsyncTask().execute(BASE_TERM+movieId+RECOMMENDATION_TERM);
 
+
+        SharedPreferences preferences = getSharedPreferences(movieId, Context.MODE_PRIVATE);
+        favFlag = preferences.getInt(movieId, 0);
+
+
+        if (favFlag ==1){
+            favouriteButton.setBackgroundColor(Color.GRAY);
+        }
+
+
         Picasso.get()
                 .load(BASE_URL+IMAGE_SIZE+poster)
                 .placeholder(R.mipmap.placeholder)
@@ -121,7 +145,31 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     }
                 });
 
+        favouriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (favFlag ==0){
+                    new AddToFavouriteAsyncTask().execute();
+                    favouriteButton.setBackgroundColor(Color.GRAY);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt(movieId, 1);
+                    editor.apply();
+                    favFlag = 1;
+                }else{
+                    new DeleteFromFavouriteAsyncTask().execute();
+                    favouriteButton.setBackgroundResource(R.color.fav);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt(movieId, 0);
+                    editor.apply();
+                    favFlag = 0;
+                }
+            }
+
+
+        });
+
     }
+
 
     public class MoviesDetailsAsyncTask extends AsyncTask<String, Void, ArrayList<Movie>> {
 
@@ -168,6 +216,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
     }
 
+
     public class RecoMoviesDetailsAsyncTask extends AsyncTask<String, Void, ArrayList<Movie>> {
 
         @Override
@@ -212,6 +261,35 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         }
     }
+
+    public class AddToFavouriteAsyncTask extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... voids) {
+            db.movieDao().insertMovie(movie);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Toast.makeText(getApplicationContext(), "Movie Added To Favourites", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+    public class DeleteFromFavouriteAsyncTask extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... voids) {
+            db.movieDao().deleteMovie(movieId);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Toast.makeText(getApplicationContext(), "Deleted From Favourites", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     public String stream2String(InputStream inputStream){
 

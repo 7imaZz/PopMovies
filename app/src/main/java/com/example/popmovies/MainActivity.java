@@ -9,7 +9,6 @@ import androidx.core.view.MenuItemCompat;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -162,6 +161,8 @@ public class MainActivity extends AppCompatActivity{
         @Override
         protected ArrayList<Movie> doInBackground(String... siteUrl) {
 
+
+
             String text;
 
             if (movies.isEmpty()){
@@ -296,7 +297,11 @@ public class MainActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         int id =  item.getItemId();
-        if (id==R.id.menu_most_pop){
+
+        if (id == R.id.action_favourites){
+            Intent intent = new Intent(MainActivity.this, FavoritesActivity.class);
+            startActivity(intent);
+        }else if (id==R.id.menu_most_pop){
             pageNum = 1;
             getIntent().putExtra("num", pageNum);
             getIntent().putExtra(URL_PATH, POP_URL);

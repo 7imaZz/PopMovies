@@ -1,5 +1,6 @@
 package com.example.popmovies;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -13,7 +14,8 @@ import android.widget.TextView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
+
+import java.util.List;
 
 public class MoviesAdapter extends BaseAdapter {
 
@@ -21,9 +23,9 @@ public class MoviesAdapter extends BaseAdapter {
     private static final String IMAGE_SIZE = "w342";
 
     private Context context;
-    private ArrayList<Movie> movies;
+    private List<Movie> movies;
 
-    public MoviesAdapter(Context context, ArrayList<Movie> movies) {
+    public MoviesAdapter(Context context, List<Movie> movies) {
         this.context = context;
         this.movies = movies;
     }
@@ -96,7 +98,7 @@ public class MoviesAdapter extends BaseAdapter {
         return view;
     }
 
-    public ArrayList<Movie> getMovies() {
+    public List<Movie> getMovies() {
         return movies;
     }
 }

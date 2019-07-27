@@ -63,12 +63,6 @@
                         android:text="2010"
                         android:textSize="22sp"/>
                     <TextView
-                        android:id="@+id/tv_duration"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="130 min"
-                        android:textSize="17sp"/>
-                    <TextView
                         android:id="@+id/tv_vote_rate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -77,17 +71,17 @@
                         android:textColor="#000"/>
 
                     <TextView
-                        android:id="@+id/tv_mark"
+                        android:id="@+id/tv_favorites"
                         android:layout_width="100dp"
                         android:layout_height="50dp"
                         android:layout_marginTop="15dp"
-                        android:background="#0f4366"
+                        android:background="#003366"
                         android:textColor="#FFF"
                         android:text="@string/Mark"
                         android:gravity="center"
                         android:clickable="true"
-                        android:focusableInTouchMode="true"
                         android:foreground="?attr/selectableItemBackground"/>
+
                 </LinearLayout>
             </LinearLayout>
 
