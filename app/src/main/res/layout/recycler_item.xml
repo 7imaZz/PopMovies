@@ -9,6 +9,7 @@
         android:layout_width="92dp"
         android:layout_height="138dp"
         android:clickable="true"
+        android:layout_centerHorizontal="true"
         android:background="?attr/selectableItemBackground"/>
 
     <ProgressBar
@@ -16,5 +17,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />
+
+    <TextView
+        android:id="@+id/tv_actor_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/img_recommended"
+        android:textSize="15sp"
+        android:textColor="#000"
+        android:text="Test"
+        android:layout_centerHorizontal="true"/>
+    <TextView
+        android:id="@+id/tv_char_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_actor_name"
+        android:textSize="10sp"
+        android:text="Test"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>

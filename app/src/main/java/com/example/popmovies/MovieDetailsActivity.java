@@ -13,6 +13,9 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -32,8 +35,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,27 +51,35 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private static final String BASE_TERM = "https://api.themoviedb.org/3/movie/";
     private static final String SIMILAR_TERM = "/similar?api_key=3b97af0112652688c49f023ecc57edb9";
     private static final String RECOMMENDATION_TERM = "/recommendations?api_key=3b97af0112652688c49f023ecc57edb9";
-
-
+    private static final String CASTS_TERM = "/casts?api_key=3b97af0112652688c49f023ecc57edb9";
+    private static final String VIDEO_TERM = "/videos?api_key=3b97af0112652688c49f023ecc57edb9&language=en-US";
 
 
     private ArrayList<Movie> sMovies = new ArrayList<>();
     private ArrayList<Movie> rMovies = new ArrayList<>();
+    private List<Actor> actors = new ArrayList<>();
+
     private SimilarAdapter sAdapter;
     private SimilarAdapter rAdapter;
+    private SimilarAdapter actorAdapter;
 
 
     private String movieId;
 
-    @BindView(R.id.tv_title) TextView titleTextView;
+    @BindView(R.id.web_trailer) WebView mWebView;
     @BindView(R.id.img_movie) ImageView movieImageView;
     @BindView(R.id.tv_released_date) TextView dateTextView;
     @BindView(R.id.tv_vote_rate) TextView voteTextView;
     @BindView(R.id.tv_overview) TextView overviewTextView;
     @BindView(R.id.pb_pic) ProgressBar progressBar;
+    @BindView(R.id.pb_video) ProgressBar videoProgressBar;
     @BindView(R.id.rv_similar) RecyclerView similarRecyclerView;
     @BindView(R.id.rv_reco) RecyclerView recommendedRecyclerView;
+    @BindView(R.id.rv_cast) RecyclerView castRecyclerView;
     @BindView(R.id.tv_favorites) TextView favouriteButton;
+    @BindView(R.id.label_cast) TextView labelCast;
+    @BindView(R.id.label_similar) TextView labelSimilar;
+    @BindView(R.id.label_reco) TextView labelRecommended;
 
     private AppDatabase db;
     private Movie movie;
@@ -104,7 +117,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         movie = new Movie(title, poster, overview, Double.parseDouble(vote), releaseDate, movieId);
 
-        titleTextView.setText(title);
+        setTitle(title);
         dateTextView.setText(releaseDate);
         voteTextView.setText(vote);
         overviewTextView.setText(overview);
@@ -117,8 +130,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
         LinearLayoutManager layoutManager1 = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recommendedRecyclerView.setLayoutManager(layoutManager1);
 
+        LinearLayoutManager castManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        castRecyclerView.setLayoutManager(castManager);
+
         new MoviesDetailsAsyncTask().execute(BASE_TERM+movieId+SIMILAR_TERM);
         new RecoMoviesDetailsAsyncTask().execute(BASE_TERM+movieId+RECOMMENDATION_TERM);
+        new ActorAsyncTask().execute(BASE_TERM+movieId+CASTS_TERM);
+        new VideoAsyncTask().execute(BASE_TERM+movieId+VIDEO_TERM);
 
 
         SharedPreferences preferences = getSharedPreferences(movieId, Context.MODE_PRIVATE);
@@ -127,6 +145,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         if (favFlag ==1){
             favouriteButton.setBackgroundColor(Color.GRAY);
+            favouriteButton.setText("Marked As Favorite".toUpperCase());
         }
 
 
@@ -151,6 +170,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 if (favFlag ==0){
                     new AddToFavouriteAsyncTask().execute();
                     favouriteButton.setBackgroundColor(Color.GRAY);
+                    favouriteButton.setText("Marked As Favorite".toUpperCase());
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putInt(movieId, 1);
                     editor.apply();
@@ -158,6 +178,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 }else{
                     new DeleteFromFavouriteAsyncTask().execute();
                     favouriteButton.setBackgroundResource(R.color.fav);
+                    favouriteButton.setText("Mark As Favorite".toUpperCase());
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putInt(movieId, 0);
                     editor.apply();
@@ -209,9 +230,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(ArrayList<Movie> movies) {
 
-            sAdapter = new SimilarAdapter(MovieDetailsActivity.this, movies);
-
+            sAdapter = new SimilarAdapter(MovieDetailsActivity.this, movies, false);
             similarRecyclerView.setAdapter(sAdapter);
+
+            if (movies.isEmpty()){
+                labelSimilar.setVisibility(View.GONE);
+            }
 
         }
     }
@@ -255,9 +279,102 @@ public class MovieDetailsActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(ArrayList<Movie> movies) {
 
-            rAdapter = new SimilarAdapter(MovieDetailsActivity.this, movies);
-
+            rAdapter = new SimilarAdapter(MovieDetailsActivity.this, movies, false);
             recommendedRecyclerView.setAdapter(rAdapter);
+
+            if (movies.isEmpty()){
+                labelRecommended.setVisibility(View.GONE);
+            }
+
+        }
+    }
+
+    public class ActorAsyncTask extends AsyncTask <String, Void, List<Actor>>{
+
+
+
+        @Override
+        protected List<Actor> doInBackground(String... siteUrl) {
+            String text;
+
+
+            try {
+
+                URL url = new URL(siteUrl[0]);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                text = stream2String(inputStream);
+
+                actors = extractActorsFromJson(text);
+
+
+                return actors;
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return actors;
+        }
+
+        @Override
+        protected void onPostExecute(List<Actor> actors) {
+
+            actorAdapter = new SimilarAdapter(MovieDetailsActivity.this, actors, true);
+            castRecyclerView.setAdapter(actorAdapter);
+
+            if (actors.isEmpty()){
+                labelCast.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    public class VideoAsyncTask extends AsyncTask<String, Void, String>{
+        @Override
+        protected String doInBackground(String... site) {
+
+            String text;
+            String key = "";
+
+            try {
+
+                URL url = new URL(site[0]);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                text = stream2String(inputStream);
+
+                key = extractVideoKey(text);
+
+                return key;
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return key;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            videoProgressBar.setVisibility(View.GONE);
+            mWebView.getSettings().setJavaScriptEnabled(true);
+            mWebView.getSettings().setPluginState(WebSettings.PluginState.ON);
+            mWebView.loadUrl("https://www.youtube.com/embed/"+s+"?autoplay=1&vq=small");
+            mWebView.setWebChromeClient(new WebChromeClient());
 
         }
     }
@@ -334,6 +451,49 @@ public class MovieDetailsActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public List<Actor> extractActorsFromJson(String json){
+
+        List<Actor> actors = new ArrayList<>();
+        try {
+
+            JSONObject root = new JSONObject(json);
+            JSONArray cast = root.getJSONArray("cast");
+
+            for (int i=0; i<cast.length(); i++){
+
+                JSONObject currentActor = cast.getJSONObject(i);
+
+                String name = currentActor.getString("name");
+                String character = currentActor.getString("character");
+                String profilePath = currentActor.getString("profile_path");
+
+                actors.add(new Actor(name, character, profilePath));
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return actors;
+    }
+
+    public String extractVideoKey(String json){
+
+        try {
+
+            JSONObject root = new JSONObject(json);
+
+            JSONArray results = root.getJSONArray("results");
+            if (results.length()>0){
+                JSONObject trailer = results.getJSONObject(0);
+                String key = trailer.getString("key");
+                return key;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

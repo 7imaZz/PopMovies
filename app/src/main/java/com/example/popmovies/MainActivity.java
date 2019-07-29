@@ -86,9 +86,6 @@ public class MainActivity extends AppCompatActivity{
         }
 
 
-        if (isNetworkAvailable(this)) {
-
-            noNetworkTextView.setVisibility(View.GONE);
             if (getIntent().getStringExtra(URL_PATH) == null) {
                 noNetworkTextView.setVisibility(View.GONE);
                 new MoviesAsyncTask().execute(POP_URL + pageNum);
@@ -97,9 +94,7 @@ public class MainActivity extends AppCompatActivity{
                 new MoviesAsyncTask().execute(getIntent().getStringExtra(URL_PATH) + pageNum);
 
             }
-        }else{
-            noNetworkTextView.setVisibility(View.VISIBLE);
-        }
+
         gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int i) {

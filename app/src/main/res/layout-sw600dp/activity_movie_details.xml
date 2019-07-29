@@ -17,11 +17,11 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="220dp">
+                android:layout_height="480dp">
                 <WebView
                     android:id="@+id/web_trailer"
                     android:layout_width="match_parent"
-                    android:layout_height="220dp"
+                    android:layout_height="480dp"
                     android:background="#003366"
                     android:text="Test"
                     android:textSize="30sp"

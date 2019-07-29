@@ -12,4 +12,5 @@
     <string name="similar_label">Similar Movies</string>
     <string name="reco_label">Recommended For You</string>
     <string name="watch_list_label">ADD TO WATCHLIST</string>
+    <string name="cast_label">Cast</string>
 </resources>
