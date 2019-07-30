@@ -79,21 +79,25 @@ public class MainActivity extends AppCompatActivity{
         previousButton = findViewById(R.id.btn_prev);
         nextButton = findViewById(R.id.btn_next);
 
-        if (getIntent().getStringExtra("num")==null){
-            pageNum = 1;
-        }else {
-            pageNum = Integer.parseInt(getIntent().getStringExtra("num"));
-        }
-
-
-            if (getIntent().getStringExtra(URL_PATH) == null) {
-                noNetworkTextView.setVisibility(View.GONE);
-                new MoviesAsyncTask().execute(POP_URL + pageNum);
-            } else {
-                noNetworkTextView.setVisibility(View.GONE);
-                new MoviesAsyncTask().execute(getIntent().getStringExtra(URL_PATH) + pageNum);
-
+        if (isNetworkAvailable(this)){
+            if (getIntent().getStringExtra("num")==null){
+                pageNum = 1;
+            }else {
+                pageNum = Integer.parseInt(getIntent().getStringExtra("num"));
             }
+
+
+                if (getIntent().getStringExtra(URL_PATH) == null) {
+                    noNetworkTextView.setVisibility(View.GONE);
+                    new MoviesAsyncTask().execute(POP_URL + pageNum);
+                } else {
+                    noNetworkTextView.setVisibility(View.GONE);
+                    new MoviesAsyncTask().execute(getIntent().getStringExtra(URL_PATH) + pageNum);
+
+                }
+        }else {
+            noNetworkTextView.setVisibility(View.VISIBLE);
+        }
 
         gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override

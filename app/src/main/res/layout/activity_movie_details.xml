@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MovieDetailsActivity">
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -79,6 +78,13 @@
                         android:textSize="17sp"
                         android:textColor="#000"/>
 
+                    <RatingBar
+                        android:id="@+id/rating_movie"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:numStars="5"
+                        style="?attr/ratingBarStyleSmall" />
+
                     <TextView
                         android:id="@+id/tv_favorites"
                         android:layout_width="100dp"
@@ -150,7 +156,22 @@
                 android:layout_height="wrap_content">
             </androidx.recyclerview.widget.RecyclerView>
 
-        </LinearLayout>
+            <TextView
+                android:id="@+id/label_rev"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="#000"
+                android:text="@string/reco_rev"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="5dp"/>
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rc_reviews"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+            </androidx.recyclerview.widget.RecyclerView>
+
+        </LinearLayout>
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

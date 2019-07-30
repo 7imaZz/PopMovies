@@ -1,6 +1,5 @@
 package com.example.popmovies;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -20,6 +19,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public class MoviesAdapter extends BaseAdapter implements Filterable {
 
     private static final String BASE_URL = "http://image.tmdb.org/t/p/";

@@ -2,11 +2,9 @@ package com.example.popmovies;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -25,9 +23,7 @@ public class SimilarAdapter extends RecyclerView.Adapter<SimilarAdapter.MoviesVi
     private static final String BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String IMAGE_SIZE = "w342";
 
-    public class MoviesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-
-        private ItemClickListener itemClickListener;
+    public class MoviesViewHolder extends RecyclerView.ViewHolder{
 
         private ImageView movieImageView;
         private TextView actorNameTextView;
@@ -41,16 +37,6 @@ public class SimilarAdapter extends RecyclerView.Adapter<SimilarAdapter.MoviesVi
             characterNameTextView = itemView.findViewById(R.id.tv_char_name);
             progressBar = itemView.findViewById(R.id.pb_pho);
 
-            itemView.setOnClickListener(this);
-        }
-
-        public void setItemClickListener(ItemClickListener itemClickListener) {
-            this.itemClickListener = itemClickListener;
-        }
-
-        @Override
-        public void onClick(View view) {
-            itemClickListener.onClick(view, getAdapterPosition(), false);
         }
     }
 

@@ -16,8 +16,11 @@ import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,15 +56,20 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private static final String RECOMMENDATION_TERM = "/recommendations?api_key=3b97af0112652688c49f023ecc57edb9";
     private static final String CASTS_TERM = "/casts?api_key=3b97af0112652688c49f023ecc57edb9";
     private static final String VIDEO_TERM = "/videos?api_key=3b97af0112652688c49f023ecc57edb9&language=en-US";
+    private static final String REVIEWS_TERM = "/reviews?api_key=3b97af0112652688c49f023ecc57edb9";
 
 
     private ArrayList<Movie> sMovies = new ArrayList<>();
     private ArrayList<Movie> rMovies = new ArrayList<>();
+    ArrayList<Review> reviews = new ArrayList<>();
     private List<Actor> actors = new ArrayList<>();
+
+
 
     private SimilarAdapter sAdapter;
     private SimilarAdapter rAdapter;
     private SimilarAdapter actorAdapter;
+    private ReviewAdapter reviewAdapter;
 
 
     private String movieId;
@@ -80,6 +88,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.label_cast) TextView labelCast;
     @BindView(R.id.label_similar) TextView labelSimilar;
     @BindView(R.id.label_reco) TextView labelRecommended;
+    @BindView(R.id.rating_movie) RatingBar ratingBar;
+    @BindView(R.id.rc_reviews) RecyclerView reviewsRecyclerView;
+    @BindView(R.id.label_rev) TextView reviewLabel;
 
     private AppDatabase db;
     private Movie movie;
@@ -121,6 +132,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         dateTextView.setText(releaseDate);
         voteTextView.setText(vote);
         overviewTextView.setText(overview);
+        ratingBar.setRating((Float.valueOf(vote)/10)*5);
 
 
 
@@ -133,10 +145,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
         LinearLayoutManager castManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         castRecyclerView.setLayoutManager(castManager);
 
+        LinearLayoutManager reviewsManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
+        reviewsRecyclerView.setLayoutManager(reviewsManager);
+
         new MoviesDetailsAsyncTask().execute(BASE_TERM+movieId+SIMILAR_TERM);
         new RecoMoviesDetailsAsyncTask().execute(BASE_TERM+movieId+RECOMMENDATION_TERM);
         new ActorAsyncTask().execute(BASE_TERM+movieId+CASTS_TERM);
         new VideoAsyncTask().execute(BASE_TERM+movieId+VIDEO_TERM);
+        new ReviewAsyncTask().execute(BASE_TERM+movieId+REVIEWS_TERM);
+
+
+
 
 
         SharedPreferences preferences = getSharedPreferences(movieId, Context.MODE_PRIVATE);
@@ -336,6 +355,49 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
     }
 
+    public class ReviewAsyncTask extends AsyncTask<String, Void, ArrayList<Review>>{
+        @Override
+        protected ArrayList<Review> doInBackground(String... site) {
+
+            String text;
+
+            try {
+
+                URL url = new URL(site[0]);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                text = stream2String(inputStream);
+
+                reviews = extractReviewsFromJson(text);
+
+                return reviews;
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return reviews;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Review> reviews) {
+            reviewAdapter = new ReviewAdapter(MovieDetailsActivity.this, reviews);
+
+            reviewsRecyclerView.setAdapter(reviewAdapter);
+
+            if (reviews.isEmpty()){
+                reviewLabel.setVisibility(View.GONE);
+            }
+        }
+    }
+
     public class VideoAsyncTask extends AsyncTask<String, Void, String>{
         @Override
         protected String doInBackground(String... site) {
@@ -479,6 +541,31 @@ public class MovieDetailsActivity extends AppCompatActivity {
         return actors;
     }
 
+    public ArrayList<Review> extractReviewsFromJson(String json){
+
+        ArrayList<Review> reviews = new ArrayList<>();
+
+        try {
+
+            JSONObject root = new JSONObject(json);
+            JSONArray results = root.getJSONArray("results");
+
+            for (int i=0; i<results.length(); i++){
+
+                JSONObject currentResult = results.getJSONObject(i);
+
+                String name = currentResult.getString("author");
+                String content = currentResult.getString("content");
+
+                reviews.add(new Review(name, content));
+            }
+            return reviews;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return reviews;
+    }
     public String extractVideoKey(String json){
 
         try {
