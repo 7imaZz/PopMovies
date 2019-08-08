@@ -1,5 +1,6 @@
 package com.example.popmovies;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -11,7 +12,7 @@ import java.util.List;
 public interface MovieDao {
 
     @Query("SELECT * FROM movies")
-    List<Movie> getAllMovies();
+    LiveData<List<Movie>> getAllMovies();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertMovie(Movie movie);

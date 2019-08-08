@@ -60,12 +60,17 @@ public class MainActivity extends AppCompatActivity{
     private Button previousButton;
     private Button nextButton;
 
+    SearchView searchView;
+
     private ArrayList<Movie> movies = new ArrayList<>();
 
     private MoviesAdapter adapter;
 
     private int pageNum;
     private int totalPages;
+
+    private int itemPosition;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,25 +84,21 @@ public class MainActivity extends AppCompatActivity{
         previousButton = findViewById(R.id.btn_prev);
         nextButton = findViewById(R.id.btn_next);
 
-        if (isNetworkAvailable(this)){
-            if (getIntent().getStringExtra("num")==null){
-                pageNum = 1;
-            }else {
-                pageNum = Integer.parseInt(getIntent().getStringExtra("num"));
-            }
-
-
-                if (getIntent().getStringExtra(URL_PATH) == null) {
-                    noNetworkTextView.setVisibility(View.GONE);
-                    new MoviesAsyncTask().execute(POP_URL + pageNum);
-                } else {
-                    noNetworkTextView.setVisibility(View.GONE);
-                    new MoviesAsyncTask().execute(getIntent().getStringExtra(URL_PATH) + pageNum);
-
-                }
+        if (getIntent().getStringExtra("num")==null){
+            pageNum = 1;
         }else {
-            noNetworkTextView.setVisibility(View.VISIBLE);
+            pageNum = Integer.parseInt(getIntent().getStringExtra("num"));
         }
+
+
+            if (getIntent().getStringExtra(URL_PATH) == null) {
+                noNetworkTextView.setVisibility(View.GONE);
+                new MoviesAsyncTask().execute(POP_URL + pageNum);
+            } else {
+                noNetworkTextView.setVisibility(View.GONE);
+                new MoviesAsyncTask().execute(getIntent().getStringExtra(URL_PATH) + pageNum);
+
+            }
 
         gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -108,6 +109,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
             {
+                itemPosition = firstVisibleItem;
                 if(firstVisibleItem + visibleItemCount >= totalItemCount){
                     nextButton.setVisibility(View.VISIBLE);
                     previousButton.setVisibility(View.VISIBLE);
@@ -143,6 +145,25 @@ public class MainActivity extends AppCompatActivity{
                 startActivity(getIntent());
             }
         });
+
+
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt("position", itemPosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        int currPos = savedInstanceState.getInt("position");
+
+        gridView.setSelection(currPos);
 
     }
 
@@ -271,7 +292,7 @@ public class MainActivity extends AppCompatActivity{
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         // Retrieve the SearchView and plug it into SearchManager
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
+        searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
         SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 

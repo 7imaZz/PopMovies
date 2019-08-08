@@ -2,12 +2,15 @@ package com.example.popmovies;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -57,7 +60,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private static final String CASTS_TERM = "/casts?api_key=3b97af0112652688c49f023ecc57edb9";
     private static final String VIDEO_TERM = "/videos?api_key=3b97af0112652688c49f023ecc57edb9&language=en-US";
     private static final String REVIEWS_TERM = "/reviews?api_key=3b97af0112652688c49f023ecc57edb9";
-
+    private static final String EGYBEST_QUERY = "https://www.egy.best/explore/?q=";
 
     private ArrayList<Movie> sMovies = new ArrayList<>();
     private ArrayList<Movie> rMovies = new ArrayList<>();
@@ -70,6 +73,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private SimilarAdapter rAdapter;
     private SimilarAdapter actorAdapter;
     private ReviewAdapter reviewAdapter;
+    private FavoriteListViewModel viewModel;
 
 
     private String movieId;
@@ -85,6 +89,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.rv_reco) RecyclerView recommendedRecyclerView;
     @BindView(R.id.rv_cast) RecyclerView castRecyclerView;
     @BindView(R.id.tv_favorites) TextView favouriteButton;
+    @BindView(R.id.tv_egybest) TextView egyBestButton;
     @BindView(R.id.label_cast) TextView labelCast;
     @BindView(R.id.label_similar) TextView labelSimilar;
     @BindView(R.id.label_reco) TextView labelRecommended;
@@ -109,6 +114,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
 
 
+        viewModel = ViewModelProviders.of(this).get(FavoriteListViewModel.class);
+
 
 
         /*titleTextView = findViewById(R.id.tv_title);
@@ -127,6 +134,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
         movieId = getIntent().getStringExtra(Constants._ID);
 
         movie = new Movie(title, poster, overview, Double.parseDouble(vote), releaseDate, movieId);
+
+        String year = "";
+        for (int i=0; i<4; i++){
+            year += releaseDate.charAt(i);
+        }
+
+        String egybestUrl = EGYBEST_QUERY+title+" ("+year+")";
 
         setTitle(title);
         dateTextView.setText(releaseDate);
@@ -183,6 +197,15 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     }
                 });
 
+        egyBestButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(egybestUrl));
+                startActivity(intent);
+            }
+        });
+
         favouriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -195,13 +218,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     editor.apply();
                     favFlag = 1;
                 }else{
-                    new DeleteFromFavouriteAsyncTask().execute();
+                    viewModel.deleteMovie(movie);
                     favouriteButton.setBackgroundResource(R.color.fav);
                     favouriteButton.setText("Mark As Favorite".toUpperCase());
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putInt(movieId, 0);
                     editor.apply();
                     favFlag = 0;
+                    Toast.makeText(getApplicationContext(), "Deleted From Favourites", Toast.LENGTH_SHORT).show();
                 }
             }
 

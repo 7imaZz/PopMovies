@@ -29,10 +29,20 @@ public class MoviesAdapter extends BaseAdapter implements Filterable {
     private List<Movie> movies;
     private List<Movie> moviesFull;
 
+
+    public MoviesAdapter(Context context) {
+        this.context = context;
+    }
+
     public MoviesAdapter(Context context, List<Movie> movies) {
         this.context = context;
         this.movies = movies;
         moviesFull = new ArrayList<>(movies);
+    }
+
+    public void setMovies(List<Movie> movies) {
+        this.movies = movies;
+        notifyDataSetChanged();
     }
 
     @Override

@@ -14,7 +14,6 @@
         android:supportsRtl="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".WatchListActivity"></activity>
         <activity android:name=".FavoritesActivity" />
         <activity
             android:name=".MovieDetailsActivity"

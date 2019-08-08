@@ -3,12 +3,22 @@ package com.example.popmovies;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.MenuItemCompat;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 
+import android.app.Application;
 import android.app.SearchManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AbsListView;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -19,13 +29,13 @@ import java.util.List;
 
 public class FavoritesActivity extends AppCompatActivity {
 
-    private AppDatabase db;
-
     private GridView gridView;
 
 
-    private List<Movie> movies = new ArrayList<>();
+    private FavoriteListViewModel viewModel;
     private MoviesAdapter adapter;
+
+    private int itemPosition;
 
 
     @Override
@@ -33,61 +43,54 @@ public class FavoritesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorites);
 
+        setTitle("Favorites");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        db = AppDatabase.getInstance(this);
 
+        adapter = new MoviesAdapter(this, new ArrayList<Movie>());
         gridView = findViewById(R.id.grid_view_fav);
         gridView.setTextFilterEnabled(true);
 
-        new GetMoviesAsyncTask().execute();
-    }
+        gridView.setAdapter(adapter);
 
-    public class GetMoviesAsyncTask extends AsyncTask<Void, Void, List<Movie>>{
+        viewModel = ViewModelProviders.of(this).get(FavoriteListViewModel.class);
 
-        @Override
-        protected List<Movie> doInBackground(Void... voids) {
-            movies = db.movieDao().getAllMovies();
-            return movies;
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> movies) {
-            adapter = new MoviesAdapter(FavoritesActivity.this, movies);
-            gridView.setAdapter(adapter);
-            setTitle("Favorites ("+movies.size()+")");
-
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        new GetMoviesAsyncTask().execute();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.fav_menu, menu);
-
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.fav_search));
-        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        viewModel.getMoviesListLiveData().observe(FavoritesActivity.this, new Observer<List<Movie>>() {
             @Override
-            public boolean onQueryTextSubmit(String s) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                adapter.getFilter().filter(s);
-                return false;
+            public void onChanged(List<Movie> movies) {
+                adapter.setMovies(movies);
             }
         });
-        return super.onCreateOptionsMenu(menu);
+        gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+                itemPosition = i;
+            }
+        });
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt("position", itemPosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        int currPos = savedInstanceState.getInt("position");
+
+        gridView.setSelection(currPos);
+
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {

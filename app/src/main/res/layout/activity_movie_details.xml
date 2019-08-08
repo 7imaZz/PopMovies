@@ -97,6 +97,18 @@
                         android:clickable="true"
                         android:foreground="?attr/selectableItemBackground"/>
 
+                    <TextView
+                        android:id="@+id/tv_egybest"
+                        android:layout_width="100dp"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@color/colorAccent"
+                        android:textColor="#FFF"
+                        android:text="@string/watch"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:foreground="?attr/selectableItemBackground"/>
+
                 </LinearLayout>
             </LinearLayout>
 
