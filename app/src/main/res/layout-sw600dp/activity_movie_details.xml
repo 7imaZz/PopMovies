@@ -126,6 +126,42 @@
 
 
             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="#000"
+                android:text="@string/dir_label"
+                android:layout_marginLeft="5dp"
+                android:layout_marginBottom="5dp"/>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:layout_marginBottom="10dp">
+
+                <ImageView
+                    android:id="@+id/img_dir"
+                    android:layout_width="92dp"
+                    android:layout_height="138dp"
+                    android:clickable="true"
+                    android:layout_centerHorizontal="true"
+                    android:background="?attr/selectableItemBackground"/>
+
+                <TextView
+                    android:id="@+id/tv_dir_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/img_dir"
+                    android:textSize="15sp"
+                    android:textColor="#000"
+                    android:text="Test"
+                    android:layout_centerHorizontal="true"/>
+
+            </RelativeLayout>
+
+
+            <TextView
                 android:id="@+id/label_cast"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

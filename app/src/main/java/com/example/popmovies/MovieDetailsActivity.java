@@ -53,6 +53,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     private static final String BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String IMAGE_SIZE = "w500";
+    private static final String DIR_IMAGE_SIZE = "w342";
+
 
     private static final String BASE_TERM = "https://api.themoviedb.org/3/movie/";
     private static final String SIMILAR_TERM = "/similar?api_key=3b97af0112652688c49f023ecc57edb9";
@@ -77,6 +79,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
 
     private String movieId;
+    private String directorName = "";
+    private String directorImagePath = "";
 
     @BindView(R.id.web_trailer) WebView mWebView;
     @BindView(R.id.img_movie) ImageView movieImageView;
@@ -96,6 +100,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @BindView(R.id.rating_movie) RatingBar ratingBar;
     @BindView(R.id.rc_reviews) RecyclerView reviewsRecyclerView;
     @BindView(R.id.label_rev) TextView reviewLabel;
+    @BindView(R.id.img_dir) ImageView directorImage;
+    @BindView(R.id.tv_dir_name) TextView directorNameTextView;
 
     private AppDatabase db;
     private Movie movie;
@@ -376,6 +382,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
             if (actors.isEmpty()){
                 labelCast.setVisibility(View.GONE);
             }
+
+            directorNameTextView.setText(directorName);
+
+            Picasso.get()
+                    .load(BASE_URL+DIR_IMAGE_SIZE+directorImagePath)
+                    .placeholder(R.mipmap.placeholder)
+                    .into(directorImage);
+
         }
     }
 
@@ -557,6 +571,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 String profilePath = currentActor.getString("profile_path");
 
                 actors.add(new Actor(name, character, profilePath));
+            }
+
+            JSONArray crew = root.getJSONArray("crew");
+            for (int i=0; i<crew.length(); i++){
+                JSONObject dirObject = crew.getJSONObject(i);
+
+                if (dirObject.getString("job").equals("Director")){
+                    directorName = dirObject.getString("name");
+                    directorImagePath = dirObject.getString("profile_path");
+                    break;
+                }
             }
 
         } catch (JSONException e) {
